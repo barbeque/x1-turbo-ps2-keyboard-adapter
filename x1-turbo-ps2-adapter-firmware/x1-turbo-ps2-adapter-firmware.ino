@@ -1,9 +1,10 @@
+// A byte structure - meant to be sent as eight active-high bits
 typedef unsigned char KeyState;
 
-// Set to true here, sent as active low
+// A single bit structure - meant to be sent as active-low
 typedef bool Bit;
 
-struct ModeA_Packet {
+typedef struct {
   // Accelerators (0 = ON)
   Bit Ctrl;
   Bit Shift;
@@ -15,17 +16,10 @@ struct ModeA_Packet {
   Bit isKeyInput;
   Bit isFromNumpad;
   KeyState Ascii; // 0 = Off
-}
+} ModeA_Packet;
 
-void Transmit_Bit_ModeA(const Bit& b) {
-  // remember, Bit is active-low, so if it's true... send 0
-}
 
-void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
-  
-}
-
-struct ModeB_Packet {
+typedef struct {
   Bit Q;
   Bit W;
   Bit E;
@@ -50,6 +44,26 @@ struct ModeB_Packet {
   Bit HTab;
   Bit Space;
   Bit Return;
+} ModeB_Packet;
+
+void Transmit_Bit_ModeA(const Bit& b) {
+  // remember, Bit is active-low, so if it's true... send 0
+}
+
+void Transmit_KeyState(const KeyState& keyState) {
+  
+}
+
+void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
+  // TODO: emit the headers
+  // emit the first 8 values - all active-low bits
+  for(unsigned short i = 0; i < 8; ++i) {
+    Transmit_Bit_ModeA(((Bit*)&keyUpdate)[i]);
+  }
+  // emit the KeyState as active-high bits
+  Transmit_KeyState(keyUpdate.Ascii);
+  
+  // TODO: emit the footers
 }
 
 void Transmit_Bit_ModeB(const Bit& b) {
@@ -57,7 +71,13 @@ void Transmit_Bit_ModeB(const Bit& b) {
 }
 
 void Transmit_ModeB(const ModeB_Packet& state) {
+  // TODO: emit header
+  // emit key states - each one is an active-low "bit"
+  for(unsigned short i = 0; i < 24; ++i) {
+    Transmit_Bit_ModeB(((Bit*)&state)[i]);
+  }
   
+  // TODO: emit footer
 }
 
 void setup() {
