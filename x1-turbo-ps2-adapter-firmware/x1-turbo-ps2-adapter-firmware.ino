@@ -49,10 +49,11 @@ typedef struct {
 
 void Transmit_Bit_ModeA(const Bit& b) {
   // remember, Bit is active-low, so if it's true... send 0
+  // TODO: do
 }
 
 void Transmit_KeyState(const KeyState& keyState) {
-  
+  // TODO: do
 }
 
 void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
@@ -69,6 +70,7 @@ void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
 
 void Transmit_Bit_ModeB(const Bit& b) {
   // remember, Bit is active-low, so if it's true... send 0
+  // TODO: do
 }
 
 void Transmit_ModeB(const ModeB_Packet& state) {
@@ -84,12 +86,10 @@ void Transmit_ModeB(const ModeB_Packet& state) {
 bool isModeB = false;
 
 void setup() {
-  // put your setup code here, to run once:
-
+  isModeB = false;
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   ModeA_Packet modeAState;
   ModeB_Packet modeBState;
 
@@ -103,10 +103,4 @@ void loop() {
   else {
     Transmit_ModeA(modeAState);
   }
-
-  // if mode A:
-  //  send mode A
-  // if mode B:
-  //  send mode B
-  //  send mode A
 }
