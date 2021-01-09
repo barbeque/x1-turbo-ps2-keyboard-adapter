@@ -4,6 +4,7 @@ typedef unsigned char KeyState;
 // A single bit structure - meant to be sent as active-low
 typedef bool Bit;
 
+// Packet sent in both Mode A and Mode B
 typedef struct {
   // Accelerators (0 = ON)
   Bit Ctrl;
@@ -18,7 +19,7 @@ typedef struct {
   KeyState Ascii; // 0 = Off
 } ModeA_Packet;
 
-
+// Packet sent in Mode B
 typedef struct {
   Bit Q;
   Bit W;
@@ -80,6 +81,8 @@ void Transmit_ModeB(const ModeB_Packet& state) {
   // TODO: emit footer
 }
 
+bool isModeB = false;
+
 void setup() {
   // put your setup code here, to run once:
 
@@ -87,5 +90,23 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  ModeA_Packet modeAState;
+  ModeB_Packet modeBState;
 
+  // TODO: detect mode switch
+  // TODO: collect key state and generate packets
+
+  if(isModeB) {
+    Transmit_ModeB(modeBState);
+    Transmit_ModeA(modeAState);
+  } 
+  else {
+    Transmit_ModeA(modeAState);
+  }
+
+  // if mode A:
+  //  send mode A
+  // if mode B:
+  //  send mode B
+  //  send mode A
 }
