@@ -158,12 +158,17 @@ void Transmit_ModeB(const ModeB_Packet& state) {
 int index = 0;
 
 void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
+  // NOTES:
+  // - caps lock and kana LATCH, so detect them and set global state
+  // - the "last key released" logic is not translating properly from the PDF so try again later
+  // - is INKEY$() really the same as ASCII? find an emulator
+  
   // TODO: actually write something to get the keyboard state from PS/2
   index = (index + 1) % 4;
   
   if(0 != index) {
     // make a fake 'pressed' event
-    a.Ascii = 'T';
+    a.Ascii = 0x54; // 'T';
   }
   else {
     // make a fake 'released' event
