@@ -84,7 +84,7 @@ void Transmit_KeyState(const KeyState& keyState) {
   // send bits 7..0 of the ASCII code of this keystate
   for(unsigned char mask = 0x80; mask > 0x00; mask >>= 1) { // verified correct
     unsigned char b = keyState & mask;
-    Transmit_Bit_ModeA(b); // send 0x00 as 0xFF = "off"
+    Transmit_Bit_ModeA(!b); // send the ASCII code "straight" as per https://kyouichisato.blogspot.com/2014/07/sharp-x1-ps2.html
   }
 }
 
@@ -96,7 +96,7 @@ void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
   delayMicroseconds(700);
   
   // emit start - a zero
-  Transmit_Bit_ModeA(0xFF); // this is correct - PDF says 250 + 750us so it's an active low
+  //Transmit_Bit_ModeA(0xFF); // this is correct - PDF says 250 + 750us, so it's an active low
   
   // emit the first 8 state flags - all active-low bits
   for(unsigned short i = 0; i < 8; ++i) {
