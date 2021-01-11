@@ -74,7 +74,7 @@ void Transmit_Bit_ModeA(const Bit& b) {
 
 void Transmit_KeyState(const KeyState& keyState) {
   // send bits 7..0 of the ASCII code of this keystate
-  for(unsigned short mask = 0x80; mask > 0x00; mask /= 2) {
+  for(unsigned char mask = 0x80; mask > 0x00; mask >>= 1) {
     unsigned char b = keyState & mask;
     Transmit_Bit_ModeA(b); // send 0x00 as 0xFF = "off"
   }
