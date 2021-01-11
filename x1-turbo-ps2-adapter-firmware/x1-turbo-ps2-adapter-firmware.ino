@@ -175,6 +175,10 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
     a.Ascii = 0x00;
   }
 
+  // TODO: handle shift (+= 0x20)
+  // TODO: handle caps-lock state (^= 0x20)
+  // TODO: handle graph state (|= 0x80)
+
   // TODO: set a state based on keyboard poll
   // TODO: set b state based on keyboard poll
 }
