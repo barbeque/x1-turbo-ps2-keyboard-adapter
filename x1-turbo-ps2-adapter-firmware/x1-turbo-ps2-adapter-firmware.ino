@@ -82,7 +82,7 @@ void Transmit_Bit_ModeA(const Bit& b) {
 
 void Transmit_KeyState(const KeyState& keyState) {
   // send bits 7..0 of the ASCII code of this keystate
-  for(unsigned char mask = 0x80; mask > 0x00; mask >>= 1) {
+  for(unsigned char mask = 0x80; mask > 0x00; mask >>= 1) { // verified correct
     unsigned char b = keyState & mask;
     Transmit_Bit_ModeA(b); // send 0x00 as 0xFF = "off"
   }
@@ -161,7 +161,6 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
   // NOTES:
   // - caps lock and kana LATCH, so detect them and set global state
   // - the "last key released" logic is not translating properly from the PDF so try again later
-  // - is INKEY$() really the same as ASCII? find an emulator
   
   // TODO: actually write something to get the keyboard state from PS/2
   index = (index + 1) % 4;
