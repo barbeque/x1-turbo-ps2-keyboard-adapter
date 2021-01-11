@@ -1,5 +1,5 @@
 // The output pin, which goes to the middle ring of the keyboard connector.
-#define PIN_OUTPUT 13
+#define PIN_X1_OUTPUT 13
 
 // TODO: PS/2 input pins
 
@@ -58,16 +58,16 @@ void Transmit_Bit_ModeA(const Bit& b) {
   // remember, Bit is active-low, so if it's true... send 0
   if(b) {
     // active-low; send a 0 - low for 250us, high for 750us
-    digitalWrite(PIN_OUTPUT, LOW);
+    digitalWrite(PIN_X1_OUTPUT, LOW);
     delayMicroseconds(250 + fudge);
-    digitalWrite(PIN_OUTPUT, HIGH);
+    digitalWrite(PIN_X1_OUTPUT, HIGH);
     delayMicroseconds(750 + fudge);
   }
   else {
     // not active; send a 1 - low for 250us, high for 1750us
-    digitalWrite(PIN_OUTPUT, LOW);
+    digitalWrite(PIN_X1_OUTPUT, LOW);
     delayMicroseconds(250 + fudge);
-    digitalWrite(PIN_OUTPUT, HIGH);
+    digitalWrite(PIN_X1_OUTPUT, HIGH);
     delayMicroseconds(1750 + fudge);
   }
 }
@@ -82,9 +82,9 @@ void Transmit_KeyState(const KeyState& keyState) {
 
 void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
   // emit header - low for > 1000us, high for 700us
-  digitalWrite(PIN_OUTPUT, LOW);
+  digitalWrite(PIN_X1_OUTPUT, LOW);
   delayMicroseconds(1000);
-  digitalWrite(PIN_OUTPUT, HIGH);
+  digitalWrite(PIN_X1_OUTPUT, HIGH);
   delayMicroseconds(700);
   
   // emit start - a zero
@@ -98,11 +98,11 @@ void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
   Transmit_KeyState(keyUpdate.Ascii);
   
   // emit the "STOP" footer - low for 250us
-  digitalWrite(PIN_OUTPUT, LOW);
+  digitalWrite(PIN_X1_OUTPUT, LOW);
   delayMicroseconds(250);
 
   // return to high now that the frame has stopped
-  digitalWrite(PIN_OUTPUT, HIGH);
+  digitalWrite(PIN_X1_OUTPUT, HIGH);
 }
 
 void Transmit_Bit_ModeB(const Bit& b) {
@@ -145,8 +145,8 @@ void setup() {
   isModeB = false;
   index = 0;
 
-  pinMode(PIN_OUTPUT, OUTPUT);
-  digitalWrite(PIN_OUTPUT, HIGH);
+  pinMode(PIN_X1_OUTPUT, OUTPUT);
+  digitalWrite(PIN_X1_OUTPUT, HIGH);
 
   Serial.begin(9600);
 
