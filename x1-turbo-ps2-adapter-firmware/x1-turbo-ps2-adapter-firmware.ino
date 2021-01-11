@@ -52,23 +52,31 @@ typedef struct {
   Bit Return;
 } ModeB_Packet;
 
+void Transmit_Low_ModeA() {
+  // send a 0 - low for 250us, high for 750us, total of 1000us
+  digitalWrite(PIN_X1_OUTPUT, LOW);
+  delayMicroseconds(250);
+  digitalWrite(PIN_X1_OUTPUT, HIGH);
+  delayMicroseconds(750);
+}
+
+void Transmit_High_ModeA() {
+  // send a 1 - low for 250us, high for 1750us, total of 2000us
+  digitalWrite(PIN_X1_OUTPUT, LOW);
+  delayMicroseconds(250);
+  digitalWrite(PIN_X1_OUTPUT, HIGH);
+  delayMicroseconds(1750);
+}
+
 void Transmit_Bit_ModeA(const Bit& b) {
-  const int fudge = 0; // smear the frames just to test if it's a timing problem
-  
   // remember, Bit is active-low, so if it's true... send 0
   if(b) {
-    // active-low; send a 0 - low for 250us, high for 750us
-    digitalWrite(PIN_X1_OUTPUT, LOW);
-    delayMicroseconds(250 + fudge);
-    digitalWrite(PIN_X1_OUTPUT, HIGH);
-    delayMicroseconds(750 + fudge);
+    // active-low
+    Transmit_Low_ModeA();
   }
   else {
-    // not active; send a 1 - low for 250us, high for 1750us
-    digitalWrite(PIN_X1_OUTPUT, LOW);
-    delayMicroseconds(250 + fudge);
-    digitalWrite(PIN_X1_OUTPUT, HIGH);
-    delayMicroseconds(1750 + fudge);
+    // not active, send high
+    Transmit_High_ModeA();
   }
 }
 
@@ -88,7 +96,7 @@ void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
   delayMicroseconds(700);
   
   // emit start - a zero
-  Transmit_Bit_ModeA(0xFF); // this is correct - PDF says 250 + 750ms so it's an active low
+  Transmit_Bit_ModeA(0xFF); // this is correct - PDF says 250 + 750us so it's an active low
   
   // emit the first 8 state flags - all active-low bits
   for(unsigned short i = 0; i < 8; ++i) {
@@ -106,18 +114,45 @@ void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
 }
 
 void Transmit_Bit_ModeB(const Bit& b) {
-  // remember, Bit is active-low, so if it's true... send 0
-  // TODO: do
+  // Mode B doesn't seem to do the active-low stuff?
+
+  if(b) {
+    // 1 - 250us L, 750us H
+    digitalWrite(PIN_X1_OUTPUT, LOW);
+    delayMicroseconds(250);
+    digitalWrite(PIN_X1_OUTPUT, HIGH);
+    delayMicroseconds(750);
+  }
+  else {
+    // 0 - 250us L, 250us H
+    digitalWrite(PIN_X1_OUTPUT, LOW);
+    delayMicroseconds(250);
+    digitalWrite(PIN_X1_OUTPUT, HIGH);
+    delayMicroseconds(250);  
+  }
 }
 
 void Transmit_ModeB(const ModeB_Packet& state) {
-  // TODO: emit header
+  // TODO: Untested!
+  digitalWrite(PIN_X1_OUTPUT, LOW);
+  delayMicroseconds(400);
+  digitalWrite(PIN_X1_OUTPUT, HIGH);
+  delayMicroseconds(200);  
+
+  // send a '0' to start the frame
+  Transmit_Bit_ModeB(0x0);
+
   // emit key states - each one is an active-low "bit"
   for(unsigned short i = 0; i < 24; ++i) {
     Transmit_Bit_ModeB(((Bit*)&state)[i]);
   }
   
-  // TODO: emit footer
+  // emit footer
+  digitalWrite(PIN_X1_OUTPUT, LOW);
+  delayMicroseconds(250);
+
+  // continue...
+  digitalWrite(PIN_X1_OUTPUT, HIGH);
 }
 
 int index = 0;
