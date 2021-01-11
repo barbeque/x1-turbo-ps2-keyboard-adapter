@@ -96,10 +96,10 @@ void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
   delayMicroseconds(700);
   
   // emit start - a zero - the two guides don't agree if this is needed
-  Transmit_Bit_ModeA(0xFF); // this is correct - PDF says 250 + 750us, so it's an active low
+  //Transmit_Bit_ModeA(0xFF); // this is correct - PDF says 250 + 750us, so it's an active low
   
-  // emit the first 8 state flags - all active-low bits
-  for(unsigned short i = 0; i < 8; ++i) {
+  // emit the first 8 state flags - all active-low bits - but in reverse
+  for(short i = 7; i >= 0; i--) {
     Transmit_Bit_ModeA(((Bit*)&keyUpdate)[i]);
   } // the two guides don't agree in which order this is x-mitted, try in reverse
   // emit the key being pressed (KeyState) again as active-low bits
@@ -167,7 +167,7 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
   
   if(0 != index) {
     // make a fake 'pressed' event
-    a.Ascii = 0x54; // 'T';
+    a.Ascii = 't'; // 'T';
     a.isKeyInput = 0x01; // set "regular" key input
   }
   else {
