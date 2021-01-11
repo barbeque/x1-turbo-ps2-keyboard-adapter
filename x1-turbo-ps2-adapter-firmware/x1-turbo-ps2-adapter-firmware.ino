@@ -168,6 +168,7 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
   if(0 != index) {
     // make a fake 'pressed' event
     a.Ascii = 0x54; // 'T';
+    a.isKeyInput = 0x1; // key input mode
   }
   else {
     // make a fake 'released' event
