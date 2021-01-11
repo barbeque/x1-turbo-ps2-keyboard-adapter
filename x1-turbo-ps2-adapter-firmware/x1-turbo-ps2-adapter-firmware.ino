@@ -119,20 +119,41 @@ void Transmit_ModeB(const ModeB_Packet& state) {
   // TODO: emit footer
 }
 
+int index = 0;
+
+void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
+  // TODO: do this right, not just with this dumb state machine
+  index = (index + 1) % 2;
+  
+  if(0 == index) {
+    // make a fake 'pressed' event
+    a.Ascii = 'R';
+  }
+  else {
+    // make a fake 'released' event
+    a.Ascii = 0x00;
+  }
+}
+
 bool isModeB = false;
 
 void setup() {
   isModeB = false;
+  index = 0;
 
   pinMode(PIN_OUTPUT, OUTPUT);
 }
 
 void loop() {
+  // Set up and zero out the key state
   ModeA_Packet modeAState;
+  memset(&modeAState, 0, sizeof(ModeA_Packet));  
   ModeB_Packet modeBState;
+  memset(&modeBState, 0, sizeof(ModeB_Packet));
 
   // TODO: detect mode switch
-  // TODO: collect key state and generate packets
+  // collect key state and generate packets
+  UpdateKeyboardState(modeAState, modeBState);
 
   if(isModeB) {
     Transmit_ModeB(modeBState);
@@ -141,4 +162,6 @@ void loop() {
   else {
     Transmit_ModeA(modeAState);
   }
+
+  delay(500); // stupid hack, but it should work
 }
