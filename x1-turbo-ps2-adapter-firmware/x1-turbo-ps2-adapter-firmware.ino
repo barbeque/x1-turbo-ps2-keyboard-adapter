@@ -1,3 +1,8 @@
+// The output pin, which goes to the middle ring of the keyboard connector.
+#define PIN_OUTPUT 2
+
+// TODO: PS/2 input pins
+
 // A byte structure - meant to be sent as eight active-high bits
 typedef unsigned char KeyState;
 
@@ -16,7 +21,7 @@ typedef struct {
   Bit isKeyRepeat;
   Bit isKeyInput;
   Bit isFromNumpad;
-  KeyState Ascii; // 0 = Off
+  KeyState Ascii; // 0 = Off ("Key Up")
 } ModeA_Packet;
 
 // Packet sent in Mode B
@@ -49,15 +54,44 @@ typedef struct {
 
 void Transmit_Bit_ModeA(const Bit& b) {
   // remember, Bit is active-low, so if it's true... send 0
-  // TODO: do
+  if(b) {
+    // active-low; send a 0 - low for 250us, high for 750us
+    digitalWrite(PIN_OUTPUT, LOW);
+    delayMicroseconds(250);
+    digitalWrite(PIN_OUTPUT, HIGH);
+    delayMicroseconds(750);
+  }
+  else {
+    // not active; send a 1 - low for 250us, high for 1750us
+    digitalWrite(PIN_OUTPUT, LOW);
+    delayMicroseconds(250);
+    digitalWrite(PIN_OUTPUT, HIGH);
+    delayMicroseconds(1750);
+  }
 }
 
 void Transmit_KeyState(const KeyState& keyState) {
-  // TODO: do
+  // send bits 7..0 of the ASCII code of this keystate
+  Transmit_Bit_ModeA(keyState & 0x80);
+  Transmit_Bit_ModeA(keyState & 0x40);
+  Transmit_Bit_ModeA(keyState & 0x20);
+  Transmit_Bit_ModeA(keyState & 0x10);
+  Transmit_Bit_ModeA(keyState & 0x08);
+  Transmit_Bit_ModeA(keyState & 0x04);
+  Transmit_Bit_ModeA(keyState & 0x02);
+  Transmit_Bit_ModeA(keyState & 0x01);
 }
 
 void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
-  // TODO: emit the headers
+  // emit header - low for > 1000us, high for 700us
+  digitalWrite(PIN_OUTPUT, LOW);
+  delayMicroseconds(1024);
+  digitalWrite(PIN_OUTPUT, HIGH);
+  delayMicroseconds(700);
+  
+  // emit start - a zero
+  Transmit_Bit_ModeA(0xFF); // actually should send a "0"
+  
   // emit the first 8 values - all active-low bits
   for(unsigned short i = 0; i < 8; ++i) {
     Transmit_Bit_ModeA(((Bit*)&keyUpdate)[i]);
@@ -65,7 +99,9 @@ void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
   // emit the KeyState as active-high bits
   Transmit_KeyState(keyUpdate.Ascii);
   
-  // TODO: emit the footers
+  // emit the "STOP" footer - low for 250us
+  digitalWrite(PIN_OUTPUT, LOW);
+  delayMicroseconds(250);
 }
 
 void Transmit_Bit_ModeB(const Bit& b) {
@@ -87,6 +123,8 @@ bool isModeB = false;
 
 void setup() {
   isModeB = false;
+
+  pinMode(PIN_OUTPUT, OUTPUT);
 }
 
 void loop() {
