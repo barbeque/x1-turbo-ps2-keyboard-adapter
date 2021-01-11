@@ -53,22 +53,22 @@ typedef struct {
 } ModeB_Packet;
 
 void Transmit_Bit_ModeA(const Bit& b) {
-  const int fudge = 1;
+  const int fudge = 0; // smear the frames just to test if it's a timing problem
   
   // remember, Bit is active-low, so if it's true... send 0
   if(b) {
     // active-low; send a 0 - low for 250us, high for 750us
     digitalWrite(PIN_OUTPUT, LOW);
-    delayMicroseconds(250 * fudge);
+    delayMicroseconds(250 + fudge);
     digitalWrite(PIN_OUTPUT, HIGH);
-    delayMicroseconds(750 * fudge);
+    delayMicroseconds(750 + fudge);
   }
   else {
     // not active; send a 1 - low for 250us, high for 1750us
     digitalWrite(PIN_OUTPUT, LOW);
-    delayMicroseconds(250 * fudge);
+    delayMicroseconds(250 + fudge);
     digitalWrite(PIN_OUTPUT, HIGH);
-    delayMicroseconds(1750 * fudge);
+    delayMicroseconds(1750 + fudge);
   }
 }
 
@@ -90,17 +90,19 @@ void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
   // emit start - a zero
   Transmit_Bit_ModeA(0x1); // actually should send a "0"
   
-  // emit the first 8 values - all active-low bits
+  // emit the first 8 state flags - all active-low bits
   for(unsigned short i = 0; i < 8; ++i) {
-    //Transmit_Bit_ModeA(((Bit*)&keyUpdate)[i]);
-    Transmit_Bit_ModeA(0); // HACK
+    Transmit_Bit_ModeA(((Bit*)&keyUpdate)[i]);
   }
-  // emit the KeyState as active-high bits
+  // emit the key being pressed (KeyState) again as active-low bits
   Transmit_KeyState(keyUpdate.Ascii);
   
   // emit the "STOP" footer - low for 250us
   digitalWrite(PIN_OUTPUT, LOW);
   delayMicroseconds(250);
+
+  // return to high now that the frame has stopped
+  digitalWrite(PIN_OUTPUT, HIGH);
 }
 
 void Transmit_Bit_ModeB(const Bit& b) {
@@ -168,8 +170,6 @@ void loop() {
   else {
     Transmit_ModeA(modeAState);
   }
-
-  digitalWrite(PIN_OUTPUT, HIGH);
 
   delay(1500); // stupid hack, but it should work
 }
