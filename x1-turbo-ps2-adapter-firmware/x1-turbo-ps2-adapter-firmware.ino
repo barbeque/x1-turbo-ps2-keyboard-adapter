@@ -88,7 +88,7 @@ void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
   delayMicroseconds(700);
   
   // emit start - a zero
-  Transmit_Bit_ModeA(0x1); // actually should send a "0"
+  Transmit_Bit_ModeA(0xFF); // actually should send a "0"
   
   // emit the first 8 state flags - all active-low bits
   for(unsigned short i = 0; i < 8; ++i) {
