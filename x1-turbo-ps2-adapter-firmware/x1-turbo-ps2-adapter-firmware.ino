@@ -1,5 +1,5 @@
 // The output pin, which goes to the middle ring of the keyboard connector.
-#define PIN_OUTPUT 2
+#define PIN_OUTPUT 13
 
 // TODO: PS/2 input pins
 
@@ -53,48 +53,47 @@ typedef struct {
 } ModeB_Packet;
 
 void Transmit_Bit_ModeA(const Bit& b) {
+  const int fudge = 1;
+  
   // remember, Bit is active-low, so if it's true... send 0
   if(b) {
     // active-low; send a 0 - low for 250us, high for 750us
     digitalWrite(PIN_OUTPUT, LOW);
-    delayMicroseconds(250);
+    delayMicroseconds(250 * fudge);
     digitalWrite(PIN_OUTPUT, HIGH);
-    delayMicroseconds(750);
+    delayMicroseconds(750 * fudge);
   }
   else {
     // not active; send a 1 - low for 250us, high for 1750us
     digitalWrite(PIN_OUTPUT, LOW);
-    delayMicroseconds(250);
+    delayMicroseconds(250 * fudge);
     digitalWrite(PIN_OUTPUT, HIGH);
-    delayMicroseconds(1750);
+    delayMicroseconds(1750 * fudge);
   }
 }
 
 void Transmit_KeyState(const KeyState& keyState) {
   // send bits 7..0 of the ASCII code of this keystate
-  Transmit_Bit_ModeA(keyState & 0x80);
-  Transmit_Bit_ModeA(keyState & 0x40);
-  Transmit_Bit_ModeA(keyState & 0x20);
-  Transmit_Bit_ModeA(keyState & 0x10);
-  Transmit_Bit_ModeA(keyState & 0x08);
-  Transmit_Bit_ModeA(keyState & 0x04);
-  Transmit_Bit_ModeA(keyState & 0x02);
-  Transmit_Bit_ModeA(keyState & 0x01);
+  for(unsigned short mask = 0x80; mask > 0x00; mask /= 2) {
+    unsigned char b = keyState & mask;
+    Transmit_Bit_ModeA(b); // send 0x00 as 0xFF = "off"
+  }
 }
 
 void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
   // emit header - low for > 1000us, high for 700us
   digitalWrite(PIN_OUTPUT, LOW);
-  delayMicroseconds(1024);
+  delayMicroseconds(1000);
   digitalWrite(PIN_OUTPUT, HIGH);
   delayMicroseconds(700);
   
   // emit start - a zero
-  Transmit_Bit_ModeA(0xFF); // actually should send a "0"
+  Transmit_Bit_ModeA(0x1); // actually should send a "0"
   
   // emit the first 8 values - all active-low bits
   for(unsigned short i = 0; i < 8; ++i) {
-    Transmit_Bit_ModeA(((Bit*)&keyUpdate)[i]);
+    //Transmit_Bit_ModeA(((Bit*)&keyUpdate)[i]);
+    Transmit_Bit_ModeA(0); // HACK
   }
   // emit the KeyState as active-high bits
   Transmit_KeyState(keyUpdate.Ascii);
@@ -122,17 +121,20 @@ void Transmit_ModeB(const ModeB_Packet& state) {
 int index = 0;
 
 void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
-  // TODO: do this right, not just with this dumb state machine
-  index = (index + 1) % 2;
+  // TODO: actually write something to get the keyboard state from PS/2
+  index = (index + 1) % 4;
   
-  if(0 == index) {
+  if(0 != index) {
     // make a fake 'pressed' event
-    a.Ascii = 'R';
+    a.Ascii = 'T';
   }
   else {
     // make a fake 'released' event
     a.Ascii = 0x00;
   }
+
+  // TODO: set a state based on keyboard poll
+  // TODO: set b state based on keyboard poll
 }
 
 bool isModeB = false;
@@ -142,16 +144,20 @@ void setup() {
   index = 0;
 
   pinMode(PIN_OUTPUT, OUTPUT);
+  digitalWrite(PIN_OUTPUT, HIGH);
+
+  Serial.begin(9600);
+
+  delay(1000); // hack
 }
 
 void loop() {
   // Set up and zero out the key state
-  ModeA_Packet modeAState;
-  memset(&modeAState, 0, sizeof(ModeA_Packet));  
-  ModeB_Packet modeBState;
-  memset(&modeBState, 0, sizeof(ModeB_Packet));
+  ModeA_Packet modeAState = {};
+  ModeB_Packet modeBState = {};
 
-  // TODO: detect mode switch
+  // TODO: detect mode switch to enable mode B mode
+  
   // collect key state and generate packets
   UpdateKeyboardState(modeAState, modeBState);
 
@@ -163,5 +169,7 @@ void loop() {
     Transmit_ModeA(modeAState);
   }
 
-  delay(500); // stupid hack, but it should work
+  digitalWrite(PIN_OUTPUT, HIGH);
+
+  delay(1500); // stupid hack, but it should work
 }
