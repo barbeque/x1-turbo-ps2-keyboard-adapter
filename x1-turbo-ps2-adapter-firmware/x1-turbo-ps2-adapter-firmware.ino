@@ -6,7 +6,7 @@
 // data pin of the PS/2 port
 #define PIN_PS2_DATA 8
 // clock pin of the PS/2 port; should be wired to an interrupt-capable pin of the Arduino
-#define PIN_PS2_INTERRUPT 5
+#define PIN_PS2_INTERRUPT PD2
 
 PS2Keyboard keyboard;
 
@@ -181,7 +181,7 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
   char asciiKey = keyboard.read();
   if(asciiKey != 0) {
     a.Ascii = asciiKey;
-    a.IsKeyInput = 0x01;
+    a.isKeyInput = 0x01;
 
     if(a.Ascii & 0x20) { // uppercase
       a.Shift = 1;
