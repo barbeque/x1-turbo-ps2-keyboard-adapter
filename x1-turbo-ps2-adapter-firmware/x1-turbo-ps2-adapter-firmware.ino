@@ -235,6 +235,4 @@ void loop() {
   else {
     Transmit_ModeA(modeAState);
   }
-
-  delay(1500); // stupid hack, but it should work
 }
