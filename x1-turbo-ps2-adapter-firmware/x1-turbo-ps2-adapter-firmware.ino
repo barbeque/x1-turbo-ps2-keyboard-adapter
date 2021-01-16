@@ -1,3 +1,5 @@
+#include "PS2Keyboard.h"
+
 // The output pin, which goes to the middle ring of the keyboard connector.
 #define PIN_X1_OUTPUT 13
 
@@ -11,16 +13,19 @@ typedef bool Bit;
 
 // Packet sent in both Mode A and Mode B
 typedef struct {
-  // Accelerators (0 = ON)
-  Bit Ctrl;
-  Bit Shift;
-  Bit Kana;
-  Bit CapsLock;
-  Bit Graph;
-  // Toggles (0 = YES)
-  Bit isKeyRepeat;
-  Bit isKeyInput;
+  // Toggles
   Bit isFromNumpad;
+  Bit isKeyInput;
+  Bit isKeyRepeat;
+  
+  // Accelerators
+  Bit Graph;
+  Bit CapsLock;
+  Bit Kana;
+  Bit Shift;
+  Bit Ctrl;  
+
+  // The actual key that was pushed
   KeyState Ascii; // 0 = Off ("Key Up")
 } ModeA_Packet;
 
@@ -98,10 +103,12 @@ void Transmit_ModeA(const ModeA_Packet& keyUpdate) {
   // emit start - a zero - the two guides don't agree if this is needed
   //Transmit_Bit_ModeA(0xFF); // this is correct - PDF says 250 + 750us, so it's an active low
   
-  // emit the first 8 state flags - all active-low bits - but in reverse
-  for(short i = 7; i >= 0; i--) {
+  // emit the first 8 state flags - all active-low bits
+  for(unsigned char i = 0; i < 8; ++i) {
+    // TODO: Test this loop
     Transmit_Bit_ModeA(((Bit*)&keyUpdate)[i]);
-  } // the two guides don't agree in which order this is x-mitted, try in reverse
+  }
+  
   // emit the key being pressed (KeyState) again as active-low bits
   Transmit_KeyState(keyUpdate.Ascii);
   
