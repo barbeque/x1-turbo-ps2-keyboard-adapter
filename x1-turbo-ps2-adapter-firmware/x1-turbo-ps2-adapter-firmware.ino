@@ -1,9 +1,14 @@
 #include "PS2Keyboard.h"
 
-// The output pin, which goes to the middle ring of the keyboard connector.
+// The output pin, which goes to the middle ring of the X1's keyboard connector.
 #define PIN_X1_OUTPUT 13
 
-// TODO: PS/2 input pins
+// data pin of the PS/2 port
+#define PIN_PS2_DATA 8
+// clock pin of the PS/2 port; should be wired to an interrupt-capable pin of the Arduino
+#define PIN_PS2_INTERRUPT 5
+
+PS2Keyboard keyboard;
 
 // A byte structure - meant to be sent as eight active-high bits
 typedef unsigned char KeyState;
@@ -168,21 +173,24 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
   // NOTES:
   // - caps lock and kana LATCH, so detect them and set global state
   // - the "last key released" logic is not translating properly from the PDF so try again later
-  
-  // TODO: actually write something to get the keyboard state from PS/2
-  index = (index + 1) % 4;
-  
-  if(0 != index) {
-    // make a fake 'pressed' event
-    a.Ascii = 't'; // 'T';
-    a.isKeyInput = 0x01; // set "regular" key input
+
+  // poll the PS/2 keyboard two ways - ASCII and key state
+  //uint8_t keyCode = keyboard.getScanCode(); // TODO: enable this
+
+  // let's try doing the naive approach for starters - just jam ASCII in there
+  char asciiKey = keyboard.read();
+  if(asciiKey != 0) {
+    a.Ascii = asciiKey;
+    a.IsKeyInput = 0x01;
+
+    if(a.Ascii & 0x20) { // uppercase
+      a.Shift = 1;
+    }
   }
   else {
-    // make a fake 'released' event
-    a.Ascii = 0x00;
+    a.Ascii = 0x00; // fake "released" event
   }
 
-  // TODO: handle shift (set flag, and += 0x20)
   // TODO: handle caps-lock state (^= 0x20)
   // TODO: handle graph state (|= 0x80)
 
@@ -202,12 +210,18 @@ void setup() {
   Serial.begin(9600);
 
   delay(1000); // hack
+
+  keyboard.begin(PIN_PS2_DATA, PIN_PS2_INTERRUPT);
 }
 
 void loop() {
   // Set up and zero out the key state
   ModeA_Packet modeAState = {};
   ModeB_Packet modeBState = {};
+
+  if(!keyboard.available()) {
+    return;
+  }
 
   // TODO: detect mode switch to enable mode B mode
   
