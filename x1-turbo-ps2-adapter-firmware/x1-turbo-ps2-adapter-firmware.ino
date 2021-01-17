@@ -167,8 +167,6 @@ void Transmit_ModeB(const ModeB_Packet& state) {
   digitalWrite(PIN_X1_OUTPUT, HIGH);
 }
 
-int index = 0;
-
 void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
   // NOTES:
   // - caps lock and kana LATCH, so detect them and set global state
@@ -221,7 +219,6 @@ bool isModeB = false;
 
 void setup() {
   isModeB = false;
-  index = 0;
 
   pinMode(PIN_X1_OUTPUT, OUTPUT);
   digitalWrite(PIN_X1_OUTPUT, HIGH);
