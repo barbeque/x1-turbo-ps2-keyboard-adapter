@@ -2,7 +2,7 @@
 This repository contains code and a PCB design to implement a PS/2 keyboard adapter for [the Sharp X1 and X1turbo 8-bit personal computers](https://en.wikipedia.org/wiki/X1_(computer)).
 
 # Current Status
-Proof-of-concept that generates one key packet over and over. Does not read PS/2 keyboard.
+Proof-of-concept that reads the PS/2 keyboard and generates a "pressed" event. Does not correctly send key-up yet.
 
 ## Known Issues
  * Doesn't work
