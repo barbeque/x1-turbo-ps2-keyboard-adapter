@@ -4,7 +4,7 @@
 #define PIN_X1_OUTPUT 13
 
 // data pin of the PS/2 port
-#define PIN_PS2_DATA 8
+#define PIN_PS2_DATA 5
 // clock pin of the PS/2 port; should be wired to an interrupt-capable pin of the Arduino
 #define PIN_PS2_INTERRUPT PD2
 
@@ -186,6 +186,8 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
     if(a.Ascii & 0x20) { // uppercase
       a.Shift = 1;
     }
+
+    Serial.println("Got key.");
   }
   else {
     a.Ascii = 0x00; // fake "released" event
