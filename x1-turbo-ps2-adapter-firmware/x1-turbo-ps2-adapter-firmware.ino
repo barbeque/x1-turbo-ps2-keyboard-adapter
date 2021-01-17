@@ -175,11 +175,27 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
   // - the "last key released" logic is not translating properly from the PDF so try again later
 
   // poll the PS/2 keyboard two ways - ASCII and key state
-  //uint8_t keyCode = keyboard.getScanCode(); // TODO: enable this
+  // this is kind of awkward since i'm never sure which order to do this in,
+  // because i suspect it's "advancing" the queue and dropping data...
+  // ...after all, readScanCode is a hack I bodged in.
+  //char asciiKey = keyboard.read();
+  uint8_t rawScancode = keyboard.readScanCode();
+  char asciiKey = 'T'; // hack
 
-  // let's try doing the naive approach for starters - just jam ASCII in there
-  char asciiKey = keyboard.read();
-  if(asciiKey != 0) {
+  // TODO: i think i need to re-do the scancode -> ASCII stuff.
+  // this could be what blew me up last time.
+
+  // I need to be able to detect [make] and [break] codes, and convert to ASCII.
+
+  bool isBreakCode = (rawScancode == 0xf0);
+  // TODO: handle extended code (0xe0)
+
+  Serial.print("Raw scancode = ");
+  Serial.print(rawScancode, HEX);
+  Serial.print("ASCII code = ");
+  Serial.println(asciiKey);
+  
+  if(!isBreakCode) {
     a.Ascii = asciiKey;
     a.isKeyInput = 0x01;
 
@@ -190,6 +206,7 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
     Serial.println("Got key.");
   }
   else {
+    // Keyboard break
     a.Ascii = 0x00; // fake "released" event
   }
 
