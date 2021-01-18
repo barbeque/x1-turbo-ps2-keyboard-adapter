@@ -184,12 +184,13 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
     if(a.Ascii & 0x20) { // uppercase
       a.Shift = 1;
     }
-
-    Serial.println("Got key.");
   }
   else {
     // Keyboard break
-    a.Ascii = 0x00; // fake "released" event
+    // TODO: if we have multiple keys "held" i might have to repeat
+    // the one that is being released with a fake "pressed" event before
+    // i "release" it... might drive a redesign of this whole functional style
+    a.Ascii = 0x00; // "released" event
   }
 
   // TODO: handle caps-lock state (^= 0x20)
