@@ -18,3 +18,4 @@ Please submit a pull request if you successfully use this on another model of X1
  * [x1center](http://www.x1center.org/), for the amazing PDF that describes the pinout, protocol, and timing of the keyboard
  * [Kyoichi Sato](https://kyouichisato.blogspot.com/2014/07/sharp-x1-ps2.html) for the extended description of the protocol which this adapter is ultimately based off of
  * The contributors of the [PS/2 keyboard library for Arduino](https://www.pjrc.com/teensy/td_libs_PS2Keyboard.html)
+ * The developer of [the PS2KeyAdvanced library for Arduino](https://github.com/techpaul/PS2KeyAdvanced)

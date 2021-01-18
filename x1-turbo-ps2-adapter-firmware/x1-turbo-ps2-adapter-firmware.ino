@@ -1,4 +1,4 @@
-#include "PS2Keyboard.h"
+#include <PS2KeyAdvanced.h>
 
 // The output pin, which goes to the middle ring of the X1's keyboard connector.
 #define PIN_X1_OUTPUT 13
