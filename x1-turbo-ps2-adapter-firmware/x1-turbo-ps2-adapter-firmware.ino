@@ -8,7 +8,7 @@
 // clock pin of the PS/2 port; should be wired to an interrupt-capable pin of the Arduino
 #define PIN_PS2_INTERRUPT PD2
 
-PS2Keyboard keyboard;
+PS2KeyAdvanced keyboard;
 
 // A byte structure - meant to be sent as eight active-high bits
 typedef unsigned char KeyState;
@@ -169,29 +169,13 @@ void Transmit_ModeB(const ModeB_Packet& state) {
 
 void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
   // NOTES:
-  // - caps lock and kana LATCH, so detect them and set global state
+  // - caps lock and kana LATCH, so detect them and set global state (incl. capslock light)
   // - the "last key released" logic is not translating properly from the PDF so try again later
 
-  // poll the PS/2 keyboard two ways - ASCII and key state
-  // this is kind of awkward since i'm never sure which order to do this in,
-  // because i suspect it's "advancing" the queue and dropping data...
-  // ...after all, readScanCode is a hack I bodged in.
-  //char asciiKey = keyboard.read();
-  uint8_t rawScancode = keyboard.readScanCode();
-  char asciiKey = 'T'; // hack
-
-  // TODO: i think i need to re-do the scancode -> ASCII stuff.
-  // this could be what blew me up last time.
-
-  // I need to be able to detect [make] and [break] codes, and convert to ASCII.
-
-  bool isBreakCode = (rawScancode == 0xf0);
-  // TODO: handle extended code (0xe0)
-
-  Serial.print("Raw scancode = ");
-  Serial.print(rawScancode, HEX);
-  Serial.print("ASCII code = ");
-  Serial.println(asciiKey);
+  // Poll the keyboard
+  uint16_t raw = keyboard.read();
+  char asciiKey = (raw & 0xFF);
+  bool isBreakCode = raw & PS2_BREAK;
   
   if(!isBreakCode) {
     a.Ascii = asciiKey;
@@ -227,7 +211,23 @@ void setup() {
 
   delay(1000); // hack
 
+  // Initialize and test the PS/2 keyboard
   keyboard.begin(PIN_PS2_DATA, PIN_PS2_INTERRUPT);
+  keyboard.echo(); // send an echo command to the keyboard to see if it's there
+  delay(6);
+  char c = keyboard.read();
+  if((c & 0xff) == PS2_KEY_ECHO || (c & 0xff) == PS2_KEY_BAT) {
+    Serial.println("Found the keyboard!");
+  }
+  else {
+    if((c & 0xff) == 0) {
+      Serial.println("Keyboard not found.");
+    }
+    else {
+      Serial.print("Invalid code returned from echo = ");
+      Serial.println(c, HEX);
+    }
+  }
 }
 
 void loop() {
