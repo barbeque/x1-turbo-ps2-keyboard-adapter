@@ -181,8 +181,20 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
     a.Ascii = asciiKey;
     a.isKeyInput = 0x01;
 
-    if(a.Ascii & 0x20) { // uppercase
+    if(a.Ascii & 0x20 || raw & PS2_SHIFT) { // uppercase
       a.Shift = 1;
+    }
+    if(raw & PS2_CAPS) {
+      a.CapsLock = 1;
+    }
+    if(raw & PS2_CTRL) {
+      a.Ctrl = 1;
+    }
+    if(raw & PS2_GUI) {
+      a.Graph = 1; // Not sure if this is the best binding
+    }
+    if(raw & PS2_ALT || raw & PS2_ALT_GR) {
+      a.Kana = 1; // Kana is a 'lock' so this is probably not great
     }
   }
   else {
