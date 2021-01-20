@@ -167,6 +167,9 @@ void Transmit_ModeB(const ModeB_Packet& state) {
   digitalWrite(PIN_X1_OUTPUT, HIGH);
 }
 
+uint8_t keysHeld[256]; // this can probably be much smaller (w/ an offset; as the keyboard cannot construct keys that are low)
+char lastKeyPressed;
+
 void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
   // NOTES:
   // - caps lock and kana LATCH, so detect them and set global state (incl. capslock light)
@@ -180,6 +183,8 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
   if(!isBreakCode) {
     a.Ascii = asciiKey;
     a.isKeyInput = 0x01;
+    lastKeyPressed = asciiKey;
+    keysHeld[asciiKey] = 1; // Maybe encode the upper byte, we have the room
 
     if(a.Ascii & 0x20 || raw & PS2_SHIFT) { // uppercase
       a.Shift = 1;
@@ -202,6 +207,14 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
     // TODO: if we have multiple keys "held" i might have to repeat
     // the one that is being released with a fake "pressed" event before
     // i "release" it... might drive a redesign of this whole functional style
+    keysHeld[asciiKey] = 0;
+
+    if(lastKeyPressed != 0 && lastKeyPressed != asciiKey) {
+      // make a note for later if this situation emerges... so we know if it
+      // is likely to happen.
+      Serial.println("TODO: Key released was not the last key pressed!");
+    }
+    
     a.Ascii = 0x00; // "released" event
   }
 
@@ -216,6 +229,11 @@ bool isModeB = false;
 
 void setup() {
   isModeB = false;
+  
+  for(unsigned short i = 0; i < 256; ++i) {
+    keysHeld[i] = 0;
+  }
+  lastKeyPressed = 0;
 
   pinMode(PIN_X1_OUTPUT, OUTPUT);
   digitalWrite(PIN_X1_OUTPUT, HIGH);
