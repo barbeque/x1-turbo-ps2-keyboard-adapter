@@ -186,6 +186,9 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
     lastKeyPressed = asciiKey;
     keysHeld[asciiKey] = 1; // Maybe encode the upper byte, we have the room
 
+    Serial.print("Sending: ");
+    Serial.println(asciiKey, HEX); // Helps us debug the carriage return issue if nothing else
+
     if(a.Ascii & 0x20 || raw & PS2_SHIFT) { // uppercase
       a.Shift = 1;
     }
@@ -211,7 +214,7 @@ void UpdateKeyboardState(ModeA_Packet& a, ModeB_Packet& b) {
 
     if(lastKeyPressed != 0 && lastKeyPressed != asciiKey) {
       // make a note for later if this situation emerges... so we know if it
-      // is likely to happen.
+      // is likely to happen. FIXME: Yeah, it happens a LOT when typing fast.
       Serial.println("TODO: Key released was not the last key pressed!");
     }
     
