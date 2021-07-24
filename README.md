@@ -13,6 +13,13 @@ Tested on the following computers so far:
 Please submit a pull request if you successfully use this on another model of X1.
 
 # How to Build
+Currently, the easiest way to build the adapter is to get ahold of an Arduino Uno or similar evaluation board. Using the Arduino IDE, you can program it with the firmware in the firmware subdirectory. You will need to add [the "PS2KeyAdvanced" library](https://www.arduino.cc/reference/en/libraries/ps2keyadvanced/) to the project using the Library Manager.
+
+Then you can strip a common stereo headphone plug (maybe you have some broken headphones lying around?) and wire the middle ring of that plug to digital pin 13 of the Arduino. Wire the rearmost ring of the plug to ground.
+
+For testing purposes, I've supplied the Arduino with +5V from USB, rather than get it from the tip of the X1's keyboard connector. I recommend not attempting to power from both at the same time.
+
+Connect a PS/2 keyboard port's DATA line to pin 5, and its CLOCK pin to pin 2.
 
 # Special Thanks
  * [x1center](http://www.x1center.org/), for the amazing PDF that describes the pinout, protocol, and timing of the keyboard
