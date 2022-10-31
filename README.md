@@ -2,15 +2,15 @@
 This repository contains code and a PCB design to implement a PS/2 keyboard adapter for [the Sharp X1 and X1turbo 8-bit personal computers](https://en.wikipedia.org/wiki/X1_(computer)).
 
 # Current Status
-Proof-of-concept that reads the PS/2 keyboard and generates a "pressed" event. Does not correctly send key-up yet.
+Proof-of-concept that reads the PS/2 keyboard and generates a "pressed" event. Does not correctly send key-up events yet as the method is ambiguous and will need some experimentation - pull requests welcome.
 
 ## Known Issues
  * Doesn't work
 
 Tested on the following computers so far:
- * CZ-852C X1 turbo
+ * CZ-852C X1turbo
 
-Please submit a pull request if you successfully use this on another model of X1.
+Please submit a pull request adding to this list if you successfully use this on another model of X1.
 
 # How to Build
 Currently, the easiest way to build the adapter is to get ahold of an Arduino Uno or similar evaluation board. Other boards will likely work (i.e. cheap Arduino Nano eBay clones) but the pin assignments may change.
