@@ -17,7 +17,7 @@ Currently, the easiest way to build the adapter is to get ahold of an Arduino Un
 
 Using the Arduino IDE, you can program it with the firmware in the firmware subdirectory. You will need to add [the "PS2KeyAdvanced" library](https://www.arduino.cc/reference/en/libraries/ps2keyadvanced/) to the project using the Library Manager.
 
-Then you can strip a common stereo headphone plug (maybe you have some broken headphones lying around?) and wire the middle ring of that plug to digital pin 13 of the Arduino. Wire the rearmost ring of the plug to ground.
+Then you can strip a common stereo headphone plug (maybe you have some broken headphones lying around?) and wire the middle ring of that plug to digital pin 13 of the Arduino. It would be a good idea to add a current-limiting resistor in series here, just in case. Wire the rearmost sleeve of the plug to ground.
 
 For testing purposes, I've supplied the Arduino with +5V from USB, rather than get it from the tip of the X1's keyboard connector. I recommend not attempting to power from both at the same time.
 
